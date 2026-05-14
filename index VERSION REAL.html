@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Prestamos</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inter:wght@300;400;500;600&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f4f1eb;--dark:#1a1714;--card:#fff;--border:#e0dbd0;--gold:#c9a040;--green:#2d7a4f;--red:#c0392b;--blue:#2456a4;--yellow:#b87d1a}
+body{font-family:'Inter',sans-serif;background:var(--bg);min-height:100vh}
+#login{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--dark)}
+.lcard{background:#222;border:1px solid #333;border-radius:20px;padding:40px;width:340px;text-align:center}
+.lcard h1{font-family:'Syne',sans-serif;font-size:1.7rem;color:var(--gold);margin-bottom:6px}
+.lcard p{color:#888;font-size:12px;margin-bottom:28px}
+.lcard input{width:100%;padding:11px 14px;background:#2a2a2a;border:1px solid #333;border-radius:8px;color:#fff;font-size:13px;margin-bottom:10px;outline:none}
+.lcard input::placeholder{color:#555}
+.lcard button{width:100%;padding:13px;background:var(--gold);color:var(--dark);border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer}
+.lerr{color:var(--red);font-size:11px;margin-top:6px;display:none}
+#app{display:none}
+.nav{background:var(--dark);padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:50px;position:sticky;top:0;z-index:100}
+.brand{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:800;color:var(--gold)}
+.navlinks{display:flex;gap:2px}
+.nbtn{background:none;border:none;color:#888;font-size:11px;padding:6px 9px;border-radius:6px;cursor:pointer}
+.nbtn:hover,.nbtn.active{background:#2a2a2a;color:#fff}
+.content{padding:18px;max-width:1100px;margin:0 auto}
+.page{display:none}.page.active{display:block}
+.ptitle{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;margin-bottom:16px;color:var(--dark)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}.navlinks{flex-wrap:wrap}}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px}
+.sl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.sv{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--dark)}
+.sv.g{color:var(--green)}.sv.r{color:var(--red)}.sv.o{color:var(--gold)}
+.tw{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:18px}
+.th{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.th h3{font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
+.si{padding:7px 11px;border:1px solid var(--border);border-radius:7px;font-size:12px;outline:none;width:170px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:8px 13px;font-size:10px;font-weight:600;color:#888;text-transform:uppercase;border-bottom:1px solid var(--border);background:#fafafa}
+td{padding:9px 13px;border-bottom:1px solid #f5f5f5}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafafa}
+.b{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600}
+.bg{background:#eef7f2;color:var(--green)}.br{background:#fdf0ee;color:var(--red)}
+.by{background:#fdf6e8;color:var(--yellow)}.bb{background:#eef2fb;color:var(--blue)}
+.sbox{display:flex;gap:8px;margin-bottom:16px}
+.sbox input{flex:1;padding:9px 13px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none}
+.sbox button{padding:9px 16px;background:var(--dark);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+.ficha{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;max-width:480px;margin:0 auto}
+.fh{background:var(--dark);padding:18px 22px;display:flex;justify-content:space-between;align-items:center}
+.fh h2{font-family:'Syne',sans-serif;font-size:1.1rem;color:#fff}
+.fh span{font-size:11px;color:#888}
+.sem{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px}
+.sg{background:#1a3d2b}.sy{background:#3d2e0a}.sr{background:#3d0f0a}
+.fstats{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--border)}
+.fst{padding:12px;text-align:center;border-right:1px solid var(--border)}
+.fst:last-child{border-right:none}
+.fsn{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800}
+.fsl{font-size:9px;color:#888;text-transform:uppercase;margin-top:2px}
+.fbody{padding:14px 18px}
+.fsec{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:10px}
+.ci{display:flex;align-items:center;gap:10px;padding:9px;border-radius:8px;margin-bottom:7px}
+.ci.p{background:#fdf0ee;border-left:3px solid var(--red)}
+.ci.pe{background:#fdf6e8;border-left:3px solid var(--yellow)}
+.ci.ok{background:#eef7f2;border-left:3px solid var(--green)}
+.ci.v{background:#f5f5f5;border-left:3px solid #ccc}
+.cin{flex:1}.cname{font-size:12px;font-weight:600}.cfecha{font-size:10px;color:#888;margin-top:2px}
+.cmonto{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;text-align:right}
+.cdias{font-size:10px;color:#888;text-align:right}
+.ff{background:#f8f8f8;padding:11px 18px;display:flex;justify-content:space-between;align-items:center}
+.ff span{font-size:11px;color:#888}.ff strong{font-family:'Syne',sans-serif;font-size:14px}
+</style>
+</head>
+<body>
+<div id="login">
+  <div class="lcard">
+    <h1>Sistema de Prestamos</h1>
+    <p>Ingresa con tu usuario y contrasena</p>
+    <input type="text" id="usr" placeholder="Usuario"/>
+    <input type="password" id="pwd" placeholder="Contrasena"/>
+    <button onclick="login()">Ingresar</button>
+    <div class="lerr" id="lerr">Usuario o contrasena incorrectos</div>
+  </div>
+</div>
+<div id="app">
+  <nav class="nav">
+    <div class="brand">Prestamos V4</div>
+    <div class="navlinks">
+      <button class="nbtn active" onclick="sp('dash',this)">Dashboard</button>
+      <button class="nbtn" onclick="sp('cli',this)">Clientes</button>
+      <button class="nbtn" onclick="sp('pre',this)">Prestamos</button>
+      <button class="nbtn" onclick="sp('cuo',this)">Cuotas</button>
+      <button class="nbtn" onclick="sp('est',this)">Estado de Cuenta</button>
+    </div>
+  </nav>
+  <div class="content">
+
+    <div class="page active" id="page-dash">
+      <div class="stats">
+        <div class="sc"><div class="sl">Caja Actual</div><div class="sv o">$3.815.000</div></div>
+        <div class="sc"><div class="sl">Prestamos Activos</div><div class="sv">45</div></div>
+        <div class="sc"><div class="sl">Clientes</div><div class="sv">24</div></div>
+        <div class="sc"><div class="sl">Cuotas Vencidas</div><div class="sv r">3</div></div>
+      </div>
+      <div class="tw">
+        <div class="th"><h3>Proximos Cobros (Mayo 2026)</h3></div>
+        <table><thead><tr><th>Cliente</th><th>Prestamo</th><th>Vence</th><th>Monto</th><th>Estado</th></tr></thead>
+        <tbody>
+          <tr><td>Sergio Federico Cancinos</td><td>PRE-28</td><td>15/05/2026</td><td>$583.333</td><td><span class="b by">Hoy</span></td></tr>
+          <tr><td>Lourdes Hernandez Cano</td><td>PRE-30</td><td>16/05/2026</td><td>$375.000</td><td><span class="b by">1 dia</span></td></tr>
+          <tr><td>Fernando Soria</td><td>PRE-38</td><td>17/05/2026</td><td>$226.000</td><td><span class="b by">Pagada</span></td></tr>
+          <tr><td>Federico Agustoni</td><td>PRE-31</td><td>19/05/2026</td><td>$360.000</td><td><span class="b by">5 dias</span></td></tr>
+          <tr><td>Matias Alberto Passo</td><td>PRE-32</td><td>20/05/2026</td><td>$150.000</td><td><span class="b bg">6 dias</span></td></tr>
+          <tr><td>Nazarena Galvan</td><td>PRE-39</td><td>21/05/2026</td><td>$240.000</td><td><span class="b bg">7 dias</span></td></tr>
+          <tr><td>Fernando Soria</td><td>PRE-33</td><td>24/05/2026</td><td>$480.000</td><td><span class="b bg">10 dias</span></td></tr>
+          <tr><td>Florencia Rossi</td><td>PRE-22</td><td>30/05/2026</td><td>$333.333</td><td><span class="b bg">16 dias</span></td></tr>
+          <tr><td>Mauricio Cejas</td><td>PRE-34</td><td>28/05/2026</td><td>$500.000</td><td><span class="b bg">14 dias</span></td></tr>
+          <tr><td>Ester Cortez</td><td>PRE-35</td><td>30/05/2026</td><td>$192.000</td><td><span class="b bg">16 dias</span></td></tr>
+          <tr><td>Andrea Cortez</td><td>PRE-36</td><td>30/05/2026</td><td>$140.000</td><td><span class="b bg">16 dias</span></td></tr>
+          <tr><td>Carina Avalo</td><td>PRE-37</td><td>30/05/2026</td><td>$250.000</td><td><span class="b bg">16 dias</span></td></tr>
+        </tbody></table>
+      </div>
+      <div class="tw">
+        <div class="th"><h3>Cuotas Vencidas sin Cobrar</h3></div>
+        <table><thead><tr><th>Cliente</th><th>Prestamo</th><th>Vencio</th><th>Saldo</th></tr></thead>
+        <tbody>
+          <tr><td>Daniel Rodrigo Albornoz</td><td>PRE-17</td><td>19/04/2026</td><td><span class="b br">$184.500</span></td></tr>
+          <tr><td>Cecilia Lorena Albaronoz</td><td>PRE-20</td><td>28/04/2026</td><td><span class="b br">$250.000</span></td></tr>
+          <tr><td>Matias Alberto Passo</td><td>PRE-21</td><td>30/04/2026</td><td><span class="b br">$200.000</span></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="page" id="page-cli">
+      <div class="ptitle">Clientes</div>
+      <div class="tw">
+        <div class="th"><h3>Listado (24 clientes)</h3><input class="si" placeholder="Buscar..." oninput="ft(this,'tcli')"/></div>
+        <table id="tcli"><thead><tr><th>Codigo</th><th>Nombre</th><th>DNI</th><th>Telefono</th></tr></thead>
+        <tbody>
+          <tr><td>CLI-1</td><td>Sandullo Claudia Alejandra</td><td>32625365</td><td>387-502-5280</td></tr>
+          <tr><td>CLI-2</td><td>Florencia Rossi</td><td>35264868</td><td>387-633-4922</td></tr>
+          <tr><td>CLI-3</td><td>Matias Alberto Passo</td><td>33970401</td><td>387-409-3361</td></tr>
+          <tr><td>CLI-4</td><td>Ariel Vesga</td><td>36934538</td><td>387-623-6173</td></tr>
+          <tr><td>CLI-5</td><td>Gisel Paola</td><td>41180340</td><td>387-605-1121</td></tr>
+          <tr><td>CLI-6</td><td>Mama Ariel Vesga</td><td>-</td><td>387-623-6173</td></tr>
+          <tr><td>CLI-7</td><td>Federico Agustoni</td><td>28886517</td><td>387-464-0215</td></tr>
+          <tr><td>CLI-8</td><td>Agustina Rossi</td><td>36805590</td><td>387-501-8089</td></tr>
+          <tr><td>CLI-9</td><td>Ricardo Molina Cardozo</td><td>34184776</td><td>381-624-1068</td></tr>
+          <tr><td>CLI-10</td><td>Agustina Cancinos Soto</td><td>41274760</td><td>387-597-8305</td></tr>
+          <tr><td>CLI-11</td><td>Javier Guillermo Colque</td><td>40149573</td><td>387-213-7744</td></tr>
+          <tr><td>CLI-12</td><td>Daniel Rodrigo Albornoz</td><td>40700120</td><td>387-522-6696</td></tr>
+          <tr><td>CLI-13</td><td>Mauricio Guillermo Cejas</td><td>32857013</td><td>387-531-3741</td></tr>
+          <tr><td>CLI-14</td><td>Cecilia Lorena Albaronoz</td><td>28933962</td><td>387-593-1820</td></tr>
+          <tr><td>CLI-15</td><td>Maria Mercedes Ferrari</td><td>28118456</td><td>387-574-8226</td></tr>
+          <tr><td>CLI-16</td><td>Carina Andrea Avalo</td><td>31900653</td><td>387-440-4559</td></tr>
+          <tr><td>CLI-17</td><td>Javier Colque Nieva (padre)</td><td>23861672</td><td>387-635-2158</td></tr>
+          <tr><td>CLI-18</td><td>Sergio Federico Cancinos</td><td>12958367</td><td>387-564-0604</td></tr>
+          <tr><td>CLI-19</td><td>Lourdes Genera Hernandez Cano</td><td>95331933</td><td>387-487-3587</td></tr>
+          <tr><td>CLI-20</td><td>Fernando Soria</td><td>26030953</td><td>387-685-3135</td></tr>
+          <tr><td>CLI-21</td><td>Ester de los Angeles Cortez</td><td>41940210</td><td>387-578-4900</td></tr>
+          <tr><td>CLI-22</td><td>Andrea Elizabeth Cortez</td><td>41053382</td><td>387-253-4892</td></tr>
+          <tr><td>CLI-23</td><td>Nazarena Del Milagro Galvan</td><td>43218121</td><td>387-440-3398</td></tr>
+          <tr><td>CLI-24</td><td>Marcos Alberto Cortez</td><td>28882559</td><td>387-484-7333</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="page" id="page-pre">
+      <div class="ptitle">Prestamos</div>
+      <div class="tw">
+        <div class="th"><h3>Listado (45 prestamos)</h3><input class="si" placeholder="Buscar..." oninput="ft(this,'tpre')"/></div>
+        <table id="tpre"><thead><tr><th>ID</th><th>Cliente</th><th>Monto</th><th>Tasa</th><th>Cuotas</th><th>Fecha</th><th>Origen</th></tr></thead>
+        <tbody>
+          <tr><td>PRE-1</td><td>Matias Alberto Passo</td><td>$600.000</td><td>25%</td><td>2</td><td>19/01/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-2</td><td>Ariel Vesga</td><td>$700.000</td><td>25%</td><td>2</td><td>19/01/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-3</td><td>Mama Ariel Vesga</td><td>$300.000</td><td>25%</td><td>2</td><td>21/01/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-4</td><td>Federico Agustoni</td><td>$250.000</td><td>20%</td><td>1</td><td>24/01/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-5</td><td>Agustina Rossi</td><td>$200.000</td><td>25%</td><td>1</td><td>07/02/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-6</td><td>Ricardo Molina Cardozo</td><td>$3.000.000</td><td>20%</td><td>1</td><td>11/02/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-7</td><td>Ariel Vesga</td><td>$50.000</td><td>25%</td><td>1</td><td>19/02/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-8</td><td>Florencia Rossi</td><td>$300.000</td><td>25%</td><td>1</td><td>23/02/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-9</td><td>Agustina Cancinos Soto</td><td>$600.000</td><td>20%</td><td>2</td><td>02/03/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-10</td><td>Gisel Paola</td><td>$200.000</td><td>25%</td><td>1</td><td>06/03/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-11</td><td>Matias Alberto Passo</td><td>$200.000</td><td>25%</td><td>1</td><td>09/03/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-12</td><td>Federico Agustoni</td><td>$500.000</td><td>20%</td><td>1</td><td>09/03/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-13</td><td>Agustina Cancinos Soto</td><td>$100.000</td><td>20%</td><td>1</td><td>09/03/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-14</td><td>Sandullo Claudia Alejandra</td><td>$500.000</td><td>25%</td><td>1</td><td>10/03/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-15</td><td>Agustina Rossi</td><td>$150.000</td><td>25%</td><td>1</td><td>17/03/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-16</td><td>Mauricio Guillermo Cejas</td><td>$500.000</td><td>25%</td><td>1</td><td>19/03/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-17</td><td>Daniel Rodrigo Albornoz</td><td>$250.000</td><td>25%</td><td>1</td><td>19/03/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-18</td><td>Javier Guillermo Colque</td><td>$200.000</td><td>25%</td><td>1</td><td>20/03/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-19</td><td>Ariel Vesga</td><td>$243.750</td><td>25%</td><td>1</td><td>21/03/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-20</td><td>Cecilia Lorena Albaronoz</td><td>$200.000</td><td>25%</td><td>1</td><td>28/03/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-21</td><td>Matias Alberto Passo</td><td>$600.000</td><td>25%</td><td>2</td><td>30/03/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-22</td><td>Florencia Rossi</td><td>$400.000</td><td>25%</td><td>2</td><td>01/04/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-23</td><td>Maria Mercedes Ferrari</td><td>$200.000</td><td>25%</td><td>1</td><td>01/04/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-24</td><td>Carina Andrea Avalo</td><td>$250.000</td><td>25%</td><td>1</td><td>02/04/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-25</td><td>Javier Colque Nieva</td><td>$200.000</td><td>25%</td><td>1</td><td>03/04/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-26</td><td>Sandullo Claudia Alejandra</td><td>$500.000</td><td>25%</td><td>2</td><td>06/04/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-27</td><td>Gisel Paola</td><td>$200.000</td><td>25%</td><td>2</td><td>06/04/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-28</td><td>Sergio Federico Cancinos</td><td>$1.000.000</td><td>25%</td><td>3</td><td>15/04/2026</td><td>Social</td></tr>
+          <tr><td>PRE-29</td><td>Javier Guillermo Colque</td><td>$500.000</td><td>25%</td><td>1</td><td>15/04/2026</td><td>Social</td></tr>
+          <tr><td>PRE-30</td><td>Lourdes Hernandez Cano</td><td>$300.000</td><td>25%</td><td>1</td><td>16/04/2026</td><td>Social</td></tr>
+          <tr><td>PRE-31</td><td>Federico Agustoni</td><td>$300.000</td><td>20%</td><td>1</td><td>19/04/2026</td><td>Social</td></tr>
+          <tr><td>PRE-32</td><td>Matias Alberto Passo</td><td>$200.000</td><td>25%</td><td>2</td><td>20/04/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-33</td><td>Fernando Soria</td><td>$400.000</td><td>20%</td><td>1</td><td>24/04/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-34</td><td>Mauricio Guillermo Cejas</td><td>$400.000</td><td>25%</td><td>1</td><td>28/04/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-35</td><td>Ester de los Angeles Cortez</td><td>$160.000</td><td>20%</td><td>1</td><td>30/04/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-36</td><td>Andrea Elizabeth Cortez</td><td>$200.000</td><td>20%</td><td>2</td><td>30/04/2026</td><td>Social</td></tr>
+          <tr><td>PRE-37</td><td>Carina Andrea Avalo</td><td>$200.000</td><td>25%</td><td>1</td><td>30/04/2026</td><td>Social</td></tr>
+          <tr><td>PRE-38</td><td>Fernando Soria</td><td>$200.000</td><td>13%</td><td>1</td><td>02/05/2026</td><td>Social</td></tr>
+          <tr><td>PRE-39</td><td>Nazarena Del Milagro Galvan</td><td>$600.000</td><td>15%</td><td>4</td><td>06/05/2026</td><td>Social</td></tr>
+          <tr><td>PRE-40</td><td>Agustina Rossi</td><td>$200.000</td><td>25%</td><td>1</td><td>07/05/2026</td><td>Propio</td></tr>
+          <tr><td>PRE-41</td><td>Andrea Elizabeth Cortez</td><td>$200.000</td><td>13%</td><td>1</td><td>11/05/2026</td><td>Social</td></tr>
+          <tr><td>PRE-42</td><td>Ariel Vesga</td><td>$400.000</td><td>25%</td><td>2</td><td>11/05/2026</td><td>Social</td></tr>
+          <tr><td>PRE-43</td><td>Agustina Cancinos Soto</td><td>$900.000</td><td>20%</td><td>3</td><td>11/05/2026</td><td>Social</td></tr>
+          <tr><td>PRE-44</td><td>Javier Guillermo Colque</td><td>$500.000</td><td>25%</td><td>1</td><td>11/05/2026</td><td>Social</td></tr>
+          <tr><td>PRE-45</td><td>Marcos Alberto Cortez</td><td>$250.000</td><td>20%</td><td>1</td><td>14/05/2026</td><td>Social</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="page" id="page-cuo">
+      <div class="ptitle">Cuotas Pendientes</div>
+      <div class="tw">
+        <div class="th"><h3>Cuotas activas</h3><input class="si" placeholder="Buscar..." oninput="ft(this,'tcuo')"/></div>
+        <table id="tcuo"><thead><tr><th>ID</th><th>Cliente</th><th>Prestamo</th><th>Vence</th><th>Monto</th><th>Estado</th></tr></thead>
+        <tbody>
+          <tr><td>CUO-21</td><td>Daniel Rodrigo Albornoz</td><td>PRE-17</td><td>19/04/2026</td><td>$184.500</td><td><span class="b br">Vencida</span></td></tr>
+          <tr><td>CUO-24</td><td>Cecilia Lorena Albaronoz</td><td>PRE-20</td><td>28/04/2026</td><td>$250.000</td><td><span class="b br">Vencida</span></td></tr>
+          <tr><td>CUO-25</td><td>Matias Alberto Passo</td><td>PRE-21</td><td>30/04/2026</td><td>$200.000</td><td><span class="b br">Vencida</span></td></tr>
+          <tr><td>CUO-36</td><td>Sergio Federico Cancinos</td><td>PRE-28</td><td>15/05/2026</td><td>$583.333</td><td><span class="b by">Hoy</span></td></tr>
+          <tr><td>CUO-40</td><td>Lourdes Hernandez Cano</td><td>PRE-30</td><td>16/05/2026</td><td>$375.000</td><td><span class="b by">1 dia</span></td></tr>
+          <tr><td>CUO-41</td><td>Federico Agustoni</td><td>PRE-31</td><td>19/05/2026</td><td>$360.000</td><td><span class="b bg">5 dias</span></td></tr>
+          <tr><td>CUO-42</td><td>Matias Alberto Passo</td><td>PRE-32</td><td>20/05/2026</td><td>$150.000</td><td><span class="b bg">6 dias</span></td></tr>
+          <tr><td>CUO-51</td><td>Nazarena Galvan</td><td>PRE-39</td><td>21/05/2026</td><td>$240.000</td><td><span class="b bg">7 dias</span></td></tr>
+          <tr><td>CUO-44</td><td>Fernando Soria</td><td>PRE-33</td><td>24/05/2026</td><td>$480.000</td><td><span class="b bg">10 dias</span></td></tr>
+          <tr><td>CUO-56</td><td>Andrea Cortez</td><td>PRE-41</td><td>26/05/2026</td><td>$226.000</td><td><span class="b bg">12 dias</span></td></tr>
+          <tr><td>CUO-45</td><td>Mauricio Cejas</td><td>PRE-34</td><td>28/05/2026</td><td>$500.000</td><td><span class="b bg">14 dias</span></td></tr>
+          <tr><td>CUO-26</td><td>Matias Passo</td><td>PRE-21</td><td>30/05/2026</td><td>$375.000</td><td><span class="b bg">16 dias</span></td></tr>
+          <tr><td>CUO-46</td><td>Ester Cortez</td><td>PRE-35</td><td>30/05/2026</td><td>$192.000</td><td><span class="b bg">16 dias</span></td></tr>
+          <tr><td>CUO-47</td><td>Andrea Cortez</td><td>PRE-36</td><td>30/05/2026</td><td>$140.000</td><td><span class="b bg">16 dias</span></td></tr>
+          <tr><td>CUO-49</td><td>Carina Avalo</td><td>PRE-37</td><td>30/05/2026</td><td>$250.000</td><td><span class="b bg">16 dias</span></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="page" id="page-est">
+      <div class="ptitle">Estado de Cuenta</div>
+      <div class="sbox">
+        <input id="sci" placeholder="Nombre del cliente..." onkeypress="if(event.key==='Enter')bc()"/>
+        <button onclick="bc()">Buscar</button>
+      </div>
+      <div id="fichabox"></div>
+    </div>
+
+  </div>
+</div>
+<script>
+const USERS={'guido':'1234','socio1':'1234','socio2':'1234'};
+
+const DB={
+  'matias alberto passo':{n:'Matias Alberto Passo',c:'CLI-3',a:3,k:2,m:1,sem:'r',cuotas:[
+    {n:'PRE-21 C1',f:'30/04/2026',mo:'$200.000',d:'Vencida',s:'v'},
+    {n:'PRE-21 C2',f:'30/05/2026',mo:'$375.000',d:'16 dias',s:'pe'},
+    {n:'PRE-32 C1',f:'20/05/2026',mo:'$150.000',d:'6 dias',s:'pe'},
+    {n:'PRE-32 C2',f:'20/06/2026',mo:'$125.000',d:'37 dias',s:'ok'}
+  ],t:'$850.000'},
+  'ariel vesga':{n:'Ariel Vesga',c:'CLI-4',a:2,k:4,m:0,sem:'g',cuotas:[
+    {n:'PRE-42 C1',f:'11/06/2026',mo:'$300.000',d:'28 dias',s:'ok'},
+    {n:'PRE-42 C2',f:'11/07/2026',mo:'$250.000',d:'58 dias',s:'ok'}
+  ],t:'$550.000'},
+  'florencia rossi':{n:'Florencia Rossi',c:'CLI-2',a:1,k:2,m:0,sem:'g',cuotas:[
+    {n:'PRE-22 C2',f:'01/06/2026',mo:'$333.333',d:'18 dias',s:'ok'}
+  ],t:'$333.333'},
+  'federico agustoni':{n:'Federico Agustoni',c:'CLI-7',a:1,k:3,m:0,sem:'g',cuotas:[
+    {n:'PRE-31 C1',f:'19/05/2026',mo:'$360.000',d:'5 dias',s:'pe'}
+  ],t:'$360.000'},
+  'agustina rossi':{n:'Agustina Rossi',c:'CLI-8',a:1,k:3,m:0,sem:'g',cuotas:[
+    {n:'PRE-40 C1',f:'07/06/2026',mo:'$250.000',d:'24 dias',s:'ok'}
+  ],t:'$250.000'},
+  'agustina cancinos soto':{n:'Agustina Cancinos Soto',c:'CLI-10',a:1,k:3,m:0,sem:'g',cuotas:[
+    {n:'PRE-43 C1',f:'11/06/2026',mo:'$480.000',d:'28 dias',s:'ok'},
+    {n:'PRE-43 C2',f:'11/07/2026',mo:'$420.000',d:'58 dias',s:'ok'},
+    {n:'PRE-43 C3',f:'11/08/2026',mo:'$360.000',d:'89 dias',s:'ok'}
+  ],t:'$1.260.000'},
+  'javier guillermo colque':{n:'Javier Guillermo Colque',c:'CLI-11',a:1,k:2,m:0,sem:'g',cuotas:[
+    {n:'PRE-44 C1',f:'11/06/2026',mo:'$625.000',d:'28 dias',s:'ok'}
+  ],t:'$625.000'},
+  'daniel rodrigo albornoz':{n:'Daniel Rodrigo Albornoz',c:'CLI-12',a:1,k:1,m:1,sem:'r',cuotas:[
+    {n:'PRE-17 C1',f:'19/04/2026',mo:'$184.500',d:'Vencida',s:'v'}
+  ],t:'$184.500'},
+  'mauricio guillermo cejas':{n:'Mauricio Guillermo Cejas',c:'CLI-13',a:1,k:2,m:0,sem:'y',cuotas:[
+    {n:'PRE-34 C1',f:'28/05/2026',mo:'$500.000',d:'14 dias',s:'pe'}
+  ],t:'$500.000'},
+  'cecilia lorena albaronoz':{n:'Cecilia Lorena Albaronoz',c:'CLI-14',a:1,k:1,m:1,sem:'r',cuotas:[
+    {n:'PRE-20 C1',f:'28/04/2026',mo:'$250.000',d:'Vencida',s:'v'}
+  ],t:'$250.000'},
+  'maria mercedes ferrari':{n:'Maria Mercedes Ferrari',c:'CLI-15',a:0,k:1,m:0,sem:'g',cuotas:[],t:'$0'},
+  'carina andrea avalo':{n:'Carina Andrea Avalo',c:'CLI-16',a:1,k:2,m:0,sem:'g',cuotas:[
+    {n:'PRE-37 C1',f:'30/05/2026',mo:'$250.000',d:'16 dias',s:'ok'}
+  ],t:'$250.000'},
+  'sergio federico cancinos':{n:'Sergio Federico Cancinos',c:'CLI-18',a:1,k:1,m:0,sem:'y',cuotas:[
+    {n:'PRE-28 C1',f:'15/05/2026',mo:'$583.333',d:'Hoy',s:'p'},
+    {n:'PRE-28 C2',f:'15/06/2026',mo:'$500.000',d:'32 dias',s:'ok'},
+    {n:'PRE-28 C3',f:'15/07/2026',mo:'$416.667',d:'62 dias',s:'ok'}
+  ],t:'$1.500.000'},
+  'lourdes genera hernandez cano':{n:'Lourdes Genera Hernandez Cano',c:'CLI-19',a:1,k:1,m:0,sem:'y',cuotas:[
+    {n:'PRE-30 C1',f:'16/05/2026',mo:'$375.000',d:'1 dia',s:'pe'}
+  ],t:'$375.000'},
+  'fernando soria':{n:'Fernando Soria',c:'CLI-20',a:1,k:2,m:0,sem:'g',cuotas:[
+    {n:'PRE-33 C1',f:'24/05/2026',mo:'$480.000',d:'10 dias',s:'pe'}
+  ],t:'$480.000'},
+  'ester de los angeles cortez':{n:'Ester de los Angeles Cortez',c:'CLI-21',a:1,k:1,m:0,sem:'g',cuotas:[
+    {n:'PRE-35 C1',f:'30/05/2026',mo:'$192.000',d:'16 dias',s:'ok'}
+  ],t:'$192.000'},
+  'andrea elizabeth cortez':{n:'Andrea Elizabeth Cortez',c:'CLI-22',a:2,k:1,m:0,sem:'g',cuotas:[
+    {n:'PRE-36 C1',f:'30/05/2026',mo:'$140.000',d:'16 dias',s:'ok'},
+    {n:'PRE-41 C1',f:'26/05/2026',mo:'$226.000',d:'12 dias',s:'ok'}
+  ],t:'$366.000'},
+  'nazarena del milagro galvan':{n:'Nazarena Del Milagro Galvan',c:'CLI-23',a:1,k:0,m:0,sem:'g',cuotas:[
+    {n:'PRE-39 C1',f:'21/05/2026',mo:'$240.000',d:'7 dias',s:'pe'},
+    {n:'PRE-39 C2',f:'05/06/2026',mo:'$217.500',d:'22 dias',s:'ok'},
+    {n:'PRE-39 C3',f:'20/06/2026',mo:'$195.000',d:'37 dias',s:'ok'},
+    {n:'PRE-39 C4',f:'05/07/2026',mo:'$172.500',d:'52 dias',s:'ok'}
+  ],t:'$825.000'},
+  'marcos alberto cortez':{n:'Marcos Alberto Cortez',c:'CLI-24',a:1,k:0,m:0,sem:'g',cuotas:[
+    {n:'PRE-45 C1',f:'14/06/2026',mo:'$300.000',d:'31 dias',s:'ok'}
+  ],t:'$300.000'}
+};
+
+function login(){
+  const u=document.getElementById('usr').value.toLowerCase();
+  const p=document.getElementById('pwd').value;
+  if(USERS[u]&&USERS[u]===p){
+    document.getElementById('login').style.display='none';
+    document.getElementById('app').style.display='block';
+  } else {
+    document.getElementById('lerr').style.display='block';
+  }
+}
+
+function sp(name,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nbtn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  el.classList.add('active');
+}
+
+function ft(inp,tid){
+  const q=inp.value.toLowerCase();
+  document.querySelectorAll('#'+tid+' tbody tr').forEach(r=>{
+    r.style.display=r.textContent.toLowerCase().includes(q)?'':'none';
+  });
+}
+
+function bc(){
+  const q=document.getElementById('sci').value.toLowerCase().trim();
+  const box=document.getElementById('fichabox');
+  const c=DB[q];
+  if(!c){
+    box.innerHTML='<p style="color:#888;text-align:center;padding:32px;font-size:13px">Cliente no encontrado. Escribi el nombre completo.<br><br><small>Ejemplos: Fernando Soria, Matias Alberto Passo, Sergio Federico Cancinos</small></p>';
+    return;
+  }
+  const sc=c.sem==='g'?'sg':c.sem==='y'?'sy':'sr';
+  const si=c.sem==='g'?'bg':c.sem==='y'?'by':'br';
+  const si2=c.sem==='g'?'Al dia':c.sem==='y'?'Atencion':'En mora';
+  const cuotasH=c.cuotas.length?c.cuotas.map(cu=>`
+    <div class="ci ${cu.s}">
+      <div class="cin"><div class="cname">${cu.n}</div><div class="cfecha">Vence ${cu.f}</div></div>
+      <div><div class="cmonto">${cu.mo}</div><div class="cdias">${cu.d}</div></div>
+    </div>`).join(''):'<p style="color:#888;font-size:12px;text-align:center;padding:16px">Sin cuotas pendientes</p>';
+  box.innerHTML=`
+    <div class="ficha">
+      <div class="fh"><div><h2>${c.n}</h2><span>${c.c}</span></div><div class="sem ${sc}"><span class="b ${si}" style="font-size:9px">${si2}</span></div></div>
+      <div class="fstats">
+        <div class="fst"><div class="fsn">${c.a}</div><div class="fsl">Activos</div></div>
+        <div class="fst"><div class="fsn">${c.k}</div><div class="fsl">Cancelados</div></div>
+        <div class="fst"><div class="fsn">${c.m}</div><div class="fsl">En mora</div></div>
+      </div>
+      <div class="fbody"><div class="fsec">Cuotas Pendientes</div>${cuotasH}</div>
+      <div class="ff"><span>Total pendiente</span><strong>${c.t}</strong></div>
+    </div>`;
+}
+
+document.getElementById('pwd').addEventListener('keypress',e=>{if(e.key==='Enter')login()});
+</script>
+</body>
+</html>
