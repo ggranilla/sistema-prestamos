@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Préstamos</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f4f1eb;--dark:#1a1714;--card:#fff;--border:#e0dbd0;--gold:#c9a040;--green:#2d7a4f;--red:#c0392b;--blue:#2456a4;--yellow:#b87d1a}
+body{font-family:'Inter',sans-serif;background:var(--bg);min-height:100vh}
+
+/* LOGIN */
+#login{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--dark)}
+.login-card{background:#222;border:1px solid #333;border-radius:20px;padding:48px 40px;width:360px;text-align:center}
+.login-card h1{font-family:'Syne',sans-serif;font-size:1.8rem;color:var(--gold);margin-bottom:8px}
+.login-card p{color:#888;font-size:13px;margin-bottom:32px}
+.login-card input{width:100%;padding:12px 16px;background:#2a2a2a;border:1px solid #333;border-radius:10px;color:#fff;font-size:14px;margin-bottom:12px;outline:none}
+.login-card input::placeholder{color:#555}
+.login-card button{width:100%;padding:14px;background:var(--gold);color:var(--dark);border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif}
+.login-error{color:var(--red);font-size:12px;margin-top:8px;display:none}
+
+/* APP */
+#app{display:none}
+.nav{background:var(--dark);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
+.nav-brand{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--gold)}
+.nav-links{display:flex;gap:4px}
+.nav-btn{background:none;border:none;color:#888;font-size:12px;padding:8px 12px;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s}
+.nav-btn:hover,.nav-btn.active{background:#2a2a2a;color:#fff}
+.nav-user{color:#666;font-size:12px}
+
+.content{padding:24px;max-width:1200px;margin:0 auto}
+.page{display:none}
+.page.active{display:block}
+
+/* CARDS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+.stat-label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px}
+.stat-val{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:var(--dark)}
+.stat-val.green{color:var(--green)}
+.stat-val.red{color:var(--red)}
+.stat-val.gold{color:var(--gold)}
+
+/* TABLE */
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.table-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.table-header h3{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+.search-input{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none;width:200px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 16px;font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border);background:#fafafa}
+td{padding:12px 16px;font-size:13px;border-bottom:1px solid #f5f5f5}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafafa}
+
+.badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.badge.green{background:#eef7f2;color:var(--green)}
+.badge.red{background:#fdf0ee;color:var(--red)}
+.badge.yellow{background:#fdf6e8;color:var(--yellow)}
+.badge.blue{background:#eef2fb;color:var(--blue)}
+
+.btn{padding:8px 16px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+.btn-primary{background:var(--dark);color:#fff}
+.btn-gold{background:var(--gold);color:var(--dark)}
+
+/* FICHA */
+.ficha{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;max-width:500px;margin:20px auto}
+.ficha-header{background:var(--dark);padding:20px 24px;display:flex;justify-content:space-between;align-items:center}
+.ficha-header h2{font-family:'Syne',sans-serif;font-size:1.2rem;color:#fff}
+.ficha-header span{font-size:12px;color:#888}
+.semaforo{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px}
+.sem-green{background:#1a3d2b}
+.sem-yellow{background:#3d2e0a}
+.sem-red{background:#3d0f0a}
+.ficha-stats{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--border)}
+.ficha-stat{padding:14px;text-align:center;border-right:1px solid var(--border)}
+.ficha-stat:last-child{border-right:none}
+.ficha-stat-num{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800}
+.ficha-stat-label{font-size:10px;color:#888;text-transform:uppercase;margin-top:2px}
+.ficha-body{padding:16px 20px}
+.cuota-item{display:flex;align-items:center;gap:12px;padding:10px;border-radius:8px;margin-bottom:8px}
+.cuota-item.pronto{background:#fdf0ee;border-left:3px solid var(--red)}
+.cuota-item.pendiente{background:#fdf6e8;border-left:3px solid var(--yellow)}
+.cuota-item.ok{background:#eef7f2;border-left:3px solid var(--green)}
+.cuota-info{flex:1}
+.cuota-nombre{font-size:13px;font-weight:600}
+.cuota-fecha{font-size:11px;color:#888;margin-top:2px}
+.cuota-monto{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;text-align:right}
+.cuota-dias{font-size:11px;color:#888;text-align:right}
+.ficha-footer{background:#f8f8f8;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+.ficha-footer span{font-size:12px;color:#888}
+.ficha-footer strong{font-family:'Syne',sans-serif;font-size:15px}
+
+.search-cliente{display:flex;gap:8px;margin-bottom:20px}
+.search-cliente input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none}
+
+.page-title{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:20px;color:var(--dark)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-card">
+    <h1>Sistema de Préstamos</h1>
+    <p>Ingresá con tu usuario y contraseña</p>
+    <input type="text" id="user" placeholder="Usuario" />
+    <input type="password" id="pass" placeholder="Contraseña" />
+    <button onclick="doLogin()">Ingresar</button>
+    <div class="login-error" id="login-error">Usuario o contraseña incorrectos</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <nav class="nav">
+    <div class="nav-brand">💰 Préstamos</div>
+    <div class="nav-links">
+      <button class="nav-btn active" onclick="showPage('dashboard')">Dashboard</button>
+      <button class="nav-btn" onclick="showPage('clientes')">Clientes</button>
+      <button class="nav-btn" onclick="showPage('prestamos')">Préstamos</button>
+      <button class="nav-btn" onclick="showPage('cobros')">Cobros</button>
+      <button class="nav-btn" onclick="showPage('estado')">Estado de Cuenta</button>
+    </div>
+    <div class="nav-user" id="nav-user"></div>
+  </nav>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-label">Caja Actual</div>
+          <div class="stat-val gold">$4.139.000</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Préstamos Activos</div>
+          <div class="stat-val">44</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Cobros Este Mes</div>
+          <div class="stat-val green">$12.735.500</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Comisiones Pendientes</div>
+          <div class="stat-val red">$345.500</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>⏰ Próximos Cobros</h3>
+        </div>
+        <table>
+          <thead><tr><th>Cliente</th><th>Préstamo</th><th>Vencimiento</th><th>Monto</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td>Fernando Soria</td><td>PRE-38</td><td>17/05/2026</td><td>$226.000</td><td><span class="badge red">⚠️ 5 días</span></td></tr>
+            <tr><td>Federico Agustoni</td><td>PRE-35</td><td>19/05/2026</td><td>$360.000</td><td><span class="badge yellow">7 días</span></td></tr>
+            <tr><td>Matías Passo</td><td>PRE-36</td><td>20/05/2026</td><td>$150.000</td><td><span class="badge yellow">8 días</span></td></tr>
+            <tr><td>Nazarena Galvan</td><td>PRE-37</td><td>21/05/2026</td><td>$240.000</td><td><span class="badge green">9 días</span></td></tr>
+            <tr><td>Fernando Soria</td><td>PRE-33</td><td>24/05/2026</td><td>$480.000</td><td><span class="badge green">12 días</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CLIENTES -->
+    <div class="page" id="page-clientes">
+      <div class="page-title">Clientes</div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>Listado de Clientes</h3>
+          <input class="search-input" placeholder="Buscar cliente..." oninput="filtrarTabla(this,'tabla-clientes')" />
+        </div>
+        <table id="tabla-clientes">
+          <thead><tr><th>Código</th><th>Nombre</th><th>DNI</th><th>Teléfono</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td>CLI-1</td><td>Sergio Cancinos</td><td>28490123</td><td>387-456-7890</td><td><span class="badge green">Activo</span></td></tr>
+            <tr><td>CLI-2</td><td>Lourdes Hernandez</td><td>31234567</td><td>387-234-5678</td><td><span class="badge green">Activo</span></td></tr>
+            <tr><td>CLI-3</td><td>Matías Passo</td><td>29876543</td><td>387-345-6789</td><td><span class="badge green">Activo</span></td></tr>
+            <tr><td>CLI-4</td><td>Nazarena Galvan</td><td>33456789</td><td>387-456-8901</td><td><span class="badge green">Activo</span></td></tr>
+            <tr><td>CLI-5</td><td>Federico Agustoni</td><td>30123456</td><td>387-567-9012</td><td><span class="badge green">Activo</span></td></tr>
+            <tr><td>CLI-6</td><td>Mauricio Cejas</td><td>27654321</td><td>387-678-0123</td><td><span class="badge green">Activo</span></td></tr>
+            <tr><td>CLI-7</td><td>Andrea Cortez</td><td>34567890</td><td>387-789-1234</td><td><span class="badge green">Activo</span></td></tr>
+            <tr><td>CLI-8</td><td>Ester Cortez</td><td>25678901</td><td>387-890-2345</td><td><span class="badge green">Activo</span></td></tr>
+            <tr><td>CLI-9</td><td>Carina Avalo</td><td>32345678</td><td>387-901-3456</td><td><span class="badge green">Activo</span></td></tr>
+            <tr><td>CLI-20</td><td>Fernando Soria</td><td>26030953</td><td>387-685-3135</td><td><span class="badge yellow">2 activos</span></td></tr>
+            <tr><td>CLI-21</td><td>Javier Colque</td><td>35678901</td><td>387-012-4567</td><td><span class="badge green">Activo</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PRESTAMOS -->
+    <div class="page" id="page-prestamos">
+      <div class="page-title">Préstamos</div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>Listado de Préstamos</h3>
+          <input class="search-input" placeholder="Buscar..." oninput="filtrarTabla(this,'tabla-prestamos')" />
+        </div>
+        <table id="tabla-prestamos">
+          <thead><tr><th>Código</th><th>Cliente</th><th>Monto</th><th>Tasa</th><th>Fecha</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td>PRE-33</td><td>Fernando Soria</td><td>$400.000</td><td>20%</td><td>24/04/2026</td><td><span class="badge yellow">Activo</span></td></tr>
+            <tr><td>PRE-34</td><td>Sergio Cancinos</td><td>$500.000</td><td>25%</td><td>25/04/2026</td><td><span class="badge yellow">Activo</span></td></tr>
+            <tr><td>PRE-35</td><td>Federico Agustoni</td><td>$300.000</td><td>20%</td><td>28/04/2026</td><td><span class="badge yellow">Activo</span></td></tr>
+            <tr><td>PRE-36</td><td>Matías Passo</td><td>$150.000</td><td>0%</td><td>29/04/2026</td><td><span class="badge yellow">Activo</span></td></tr>
+            <tr><td>PRE-37</td><td>Nazarena Galvan</td><td>$200.000</td><td>20%</td><td>30/04/2026</td><td><span class="badge yellow">Activo</span></td></tr>
+            <tr><td>PRE-38</td><td>Fernando Soria</td><td>$200.000</td><td>13%</td><td>02/05/2026</td><td><span class="badge yellow">Activo</span></td></tr>
+            <tr><td>PRE-39</td><td>Mauricio Cejas</td><td>$400.000</td><td>25%</td><td>06/05/2026</td><td><span class="badge yellow">Activo</span></td></tr>
+            <tr><td>PRE-40</td><td>Lourdes Hernandez</td><td>$300.000</td><td>25%</td><td>07/05/2026</td><td><span class="badge yellow">Activo</span></td></tr>
+            <tr><td>PRE-44</td><td>Javier Colque</td><td>$500.000</td><td>25%</td><td>12/05/2026</td><td><span class="badge blue">Nuevo</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- COBROS -->
+    <div class="page" id="page-cobros">
+      <div class="page-title">Cobros</div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>Historial de Cobros</h3>
+          <input class="search-input" placeholder="Buscar..." oninput="filtrarTabla(this,'tabla-cobros')" />
+        </div>
+        <table id="tabla-cobros">
+          <thead><tr><th>Código</th><th>Préstamo</th><th>Cliente</th><th>Fecha Cobro</th><th>Monto</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td>COB-1</td><td>PRE-1</td><td>Sergio Cancinos</td><td>05/02/2026</td><td>$375.000</td><td><span class="badge green">✅ Cobrado</span></td></tr>
+            <tr><td>COB-2</td><td>PRE-2</td><td>Lourdes Hernandez</td><td>06/02/2026</td><td>$250.000</td><td><span class="badge green">✅ Cobrado</span></td></tr>
+            <tr><td>COB-27</td><td>PRE-27</td><td>Andrea Cortez</td><td>05/05/2026</td><td>$226.000</td><td><span class="badge green">✅ Cobrado</span></td></tr>
+            <tr><td>COB-29</td><td>PRE-29</td><td>Ester Cortez</td><td>06/05/2026</td><td>$192.000</td><td><span class="badge green">✅ Cobrado</span></td></tr>
+            <tr><td>COB-30</td><td>PRE-30</td><td>Carina Avalo</td><td>07/05/2026</td><td>$250.000</td><td><span class="badge green">✅ Cobrado</span></td></tr>
+            <tr><td>COB-31</td><td>PRE-31</td><td>Mauricio Cejas</td><td>12/05/2026</td><td>$625.000</td><td><span class="badge green">✅ Cobrado</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ESTADO DE CUENTA -->
+    <div class="page" id="page-estado">
+      <div class="page-title">Estado de Cuenta</div>
+      <div class="search-cliente">
+        <input id="search-cliente-input" placeholder="Nombre del cliente..." />
+        <button class="btn btn-primary" onclick="buscarCliente()">Buscar</button>
+      </div>
+      <div id="ficha-container"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const USERS = {
+  'guido': '1234',
+  'socio1': '1234',
+  'socio2': '1234'
+};
+
+const CLIENTES = {
+  'fernando soria': {
+    nombre: 'Fernando Soria', codigo: 'CLI-20',
+    activos: 2, cancelados: 0, mora: 0,
+    semaforo: 'yellow',
+    cuotas: [
+      {nombre:'PRE-38 · Cuota 1', fecha:'17/05/2026', monto:'$226.000', dias:'5 días', estado:'pronto'},
+      {nombre:'PRE-33 · Cuota 1', fecha:'24/05/2026', monto:'$480.000', dias:'12 días', estado:'pendiente'}
+    ],
+    total: '$706.000'
+  },
+  'sergio cancinos': {
+    nombre: 'Sergio Cancinos', codigo: 'CLI-1',
+    activos: 1, cancelados: 3, mora: 0,
+    semaforo: 'green',
+    cuotas: [
+      {nombre:'PRE-34 · Cuota 1', fecha:'25/05/2026', monto:'$625.000', dias:'13 días', estado:'pendiente'}
+    ],
+    total: '$625.000'
+  },
+  'javier colque': {
+    nombre: 'Javier Colque', codigo: 'CLI-21',
+    activos: 1, cancelados: 1, mora: 0,
+    semaforo: 'green',
+    cuotas: [
+      {nombre:'PRE-44 · Cuota 1', fecha:'12/06/2026', monto:'$625.000', dias:'29 días', estado:'ok'}
+    ],
+    total: '$625.000'
+  }
+};
+
+function doLogin() {
+  const u = document.getElementById('user').value.toLowerCase();
+  const p = document.getElementById('pass').value;
+  if (USERS[u] && USERS[u] === p) {
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('nav-user').textContent = u;
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function filtrarTabla(input, tableId) {
+  const q = input.value.toLowerCase();
+  const rows = document.querySelectorAll('#' + tableId + ' tbody tr');
+  rows.forEach(r => {
+    r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function buscarCliente() {
+  const q = document.getElementById('search-cliente-input').value.toLowerCase().trim();
+  const c = CLIENTES[q];
+  const container = document.getElementById('ficha-container');
+  if (!c) {
+    container.innerHTML = '<p style="color:#888;text-align:center;padding:32px">Cliente no encontrado. Probá con: Fernando Soria, Sergio Cancinos, Javier Colque</p>';
+    return;
+  }
+  const semColor = c.semaforo === 'green' ? 'sem-green' : c.semaforo === 'yellow' ? 'sem-yellow' : 'sem-red';
+  const semIcon = c.semaforo === 'green' ? '🟢' : c.semaforo === 'yellow' ? '🟡' : '🔴';
+  let cuotasHTML = c.cuotas.map(cu => `
+    <div class="cuota-item ${cu.estado}">
+      <div class="cuota-info">
+        <div class="cuota-nombre">${cu.nombre}</div>
+        <div class="cuota-fecha">Vence ${cu.fecha}</div>
+      </div>
+      <div>
+        <div class="cuota-monto">${cu.monto}</div>
+        <div class="cuota-dias">${cu.dias}</div>
+      </div>
+    </div>`).join('');
+  container.innerHTML = `
+    <div class="ficha">
+      <div class="ficha-header">
+        <div><h2>${c.nombre}</h2><span>${c.codigo}</span></div>
+        <div class="semaforo ${semColor}">${semIcon}</div>
+      </div>
+      <div class="ficha-stats">
+        <div class="ficha-stat"><div class="ficha-stat-num">${c.activos}</div><div class="ficha-stat-label">Activos</div></div>
+        <div class="ficha-stat"><div class="ficha-stat-num">${c.cancelados}</div><div class="ficha-stat-label">Cancelados</div></div>
+        <div class="ficha-stat"><div class="ficha-stat-num">${c.mora}</div><div class="ficha-stat-label">En mora</div></div>
+      </div>
+      <div class="ficha-body">
+        <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:12px">⏳ Cuotas Pendientes</div>
+        ${cuotasHTML}
+      </div>
+      <div class="ficha-footer"><span>Total pendiente</span><strong>${c.total}</strong></div>
+    </div>`;
+}
+
+document.getElementById('search-cliente-input').addEventListener('keypress', e => {
+  if (e.key === 'Enter') buscarCliente();
+});
+</script>
+</body>
+</html>
